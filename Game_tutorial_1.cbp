@@ -35,6 +35,7 @@
 			<Add option="-lSDL2" />
 		</Linker>
 		<Unit filename="main.cpp" />
+		<Unit filename="tutorial_1.h" />
 		<Extensions>
 			<envvars />
 			<code_completion />
