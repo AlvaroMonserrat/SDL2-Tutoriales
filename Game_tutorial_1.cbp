@@ -5,6 +5,7 @@
 		<Option title="Game_tutorial_1" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
+		<Option virtualFolders="images/" />
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/Debug/Game_tutorial_1" prefix_auto="1" extension_auto="1" />
@@ -36,10 +37,8 @@
 		</Linker>
 		<Unit filename="main.cpp" />
 		<Unit filename="tutorial_1.h" />
-		<Extensions>
-			<envvars />
-			<code_completion />
-			<debugger />
-		</Extensions>
+		<Unit filename="tutorial_2.h" />
+		<Unit filename="tutorial_3.h" />
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
