@@ -1,12 +1,14 @@
 # depslib dependency file v1.0
-1621202680 source:/home/alvaro/Documents/C++/Game_tutorial_1/main.cpp
+1621515288 source:/home/alvaro/Documents/C++/Game_tutorial_1/main.cpp
 	<iostream>
 	<SDL2/SDL.h>
-	"tutorial_3.h"
+	"tutorial_4.h"
 
 1620741829 /home/alvaro/Documents/C++/Game_tutorial_1/tutorial_1.h
 
 1620758325 /home/alvaro/Documents/C++/Game_tutorial_1/tutorial_2.h
 
-1621202729 /home/alvaro/Documents/C++/Game_tutorial_1/tutorial_3.h
+1621203250 /home/alvaro/Documents/C++/Game_tutorial_1/tutorial_3.h
+
+1621517171 /home/alvaro/Documents/C++/Game_tutorial_1/tutorial_4.h
 

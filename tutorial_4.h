@@ -1,8 +1,11 @@
-#ifndef TUTORIAL_3_H_INCLUDED
-#define TUTORIAL_3_H_INCLUDED
+#ifndef TUTORIAL_4_H_INCLUDED
+#define TUTORIAL_4_H_INCLUDED
 
 /*
-    Tutorial 3: Evento - Presionar Teclas
+    Tutorial 4: Carga de la superficie optimizada y strech imagen
+    Hacer más rápido el blit
+    (blit: Una operación lógica en la que un bloque de datos se mueve o se copia
+    rápidamente en la memoria, que se usa más comúnmente para animar gráficos bidimensionales.)
 */
 
 using namespace std;
@@ -55,7 +58,7 @@ bool init(){
         success = false;
     }else{
         //Crear la ventana
-        gWindow = SDL_CreateWindow("Tutorial 3", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+        gWindow = SDL_CreateWindow("Tutorial 4", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
         if( gWindow == NULL){
            cout << "La ventana no pudo ser creada: " << SDL_GetError() << endl;
            success = false;
@@ -128,71 +131,84 @@ void close(){
 }
 
 SDL_Surface* loadSurface(std::string path){
+
+    //Imagen final optimizada
+    SDL_Surface* optimizedSurface = NULL;
+
     // Cargar imagen en la superficie desde un path especifica
     SDL_Surface* loadSurface = SDL_LoadBMP(path.c_str());
     if(loadSurface == NULL){
         cout << "Error al cargar la imagen en la ruta: " << path.c_str() << endl;
+    }else{
+        //Convertir superficio al formato de la pantalla (Se crea una copia de loadSurface)
+        optimizedSurface = SDL_ConvertSurface(loadSurface, gScreenSurface->format, 0);
+        if(optimizedSurface == NULL){
+            cout << "Error al optimizar la imagen" << endl;
+        }
+        //Eliminar superficie de carga
+        SDL_FreeSurface(loadSurface);
+
     }
 
-    return loadSurface;
+    return optimizedSurface;
 }
 
-
-#endif // TUTORIAL_3_H_INCLUDED
-
-
-/*
-int main(){
-
-        if(!init()){
-            cout << "Ha fallado la inicialización" << endl;
+void gameRun(){
+    if(!init()){
+        cout << "Ha fallado la inicialización" << endl;
+    }else{
+        if(!loadMedia()){
+            cout << "Ha fallado cargar la imagen" << endl;
         }else{
-            if(!loadMedia()){
-                cout << "Ha fallado cargar la imagen" << endl;
-            }else{
 
-                gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
+            gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
 
-                while(!quit)
+            while(!quit)
+            {
+                while(SDL_PollEvent(&eventHandler) != 0)
                 {
-                    while(SDL_PollEvent(&eventHandler) != 0)
+                    if(eventHandler.type == SDL_QUIT)
                     {
-                        if(eventHandler.type == SDL_QUIT)
+                        quit = true;
+                    }else if(eventHandler.type == SDL_KEYDOWN){
+                        switch(eventHandler.key.keysym.sym)
                         {
-                            quit = true;
-                        }else if(eventHandler.type == SDL_KEYDOWN){
-                            switch(eventHandler.key.keysym.sym)
-                            {
-                                case SDLK_UP:
-                                    gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_UP];
-                                    break;
-                                case SDLK_DOWN:
-                                    gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN];
-                                    break;
-                                case SDLK_LEFT:
-                                    gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_LEFT];
-                                    break;
-                                case SDLK_RIGHT:
-                                    gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_RIGHT];
-                                    break;
-                            }
-
+                            case SDLK_UP:
+                                gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_UP];
+                                break;
+                            case SDLK_DOWN:
+                                gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN];
+                                break;
+                            case SDLK_LEFT:
+                                gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_LEFT];
+                                break;
+                            case SDLK_RIGHT:
+                                gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_RIGHT];
+                                break;
                         }
-                    }
 
-                    //
-                    SDL_BlitSurface(gCurrentSurface, NULL, gScreenSurface, NULL);
-                    //Actualizar superficie
-                    SDL_UpdateWindowSurface(gWindow);
+                    }
                 }
 
+                //
+                //Aplicar ajuste de imagen
+                SDL_Rect stretchRect;
+                stretchRect.x = 0;
+                stretchRect.y = 0;
+                stretchRect.w = SCREEN_WIDTH;
+                stretchRect.h = SCREEN_HEIGHT;
+
+                SDL_BlitScaled(gCurrentSurface, NULL, gScreenSurface, NULL);
+                //SDL_BlitSurface(gCurrentSurface, NULL, gScreenSurface, NULL);
+                //Actualizar superficie
+                SDL_UpdateWindowSurface(gWindow);
             }
+
         }
+    }
 
     // Libera recursos y cerrar SDL
     close();
-
-    return 0;
 }
 
-*/
+#endif // TUTORIAL_4_H_INCLUDED
