@@ -33,13 +33,16 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Linker>
-			<Add option="-lSDL2" />
+			<Add option="-lSDL2 -lSDL2_image" />
 		</Linker>
 		<Unit filename="main.cpp" />
 		<Unit filename="tutorial_1.h" />
 		<Unit filename="tutorial_2.h" />
 		<Unit filename="tutorial_3.h" />
 		<Unit filename="tutorial_4.h" />
+		<Unit filename="tutorial_5.h" />
+		<Unit filename="tutorial_6.h" />
+		<Unit filename="tutorial_7.h" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

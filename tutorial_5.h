@@ -1,13 +1,10 @@
-#ifndef TUTORIAL_4_H_INCLUDED
-#define TUTORIAL_4_H_INCLUDED
+#ifndef TUTORIAL_5_H_INCLUDED
+#define TUTORIAL_5_H_INCLUDED
 #include<iostream>
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
 /*
-    Tutorial 4: Carga de la superficie optimizada y strech imagen
-    Hacer más rápido el blit
-    (blit: Una operación lógica en la que un bloque de datos se mueve o se copia
-    rápidamente en la memoria, que se usa más comúnmente para animar gráficos bidimensionales.)
+    Tutorial 5: Cargar Imagen PNG con SDL2_images
 */
 
 using namespace std;
@@ -65,8 +62,16 @@ bool init(){
            cout << "La ventana no pudo ser creada: " << SDL_GetError() << endl;
            success = false;
         }else{
-            //Obtener la superficie de la ventana
-            gScreenSurface = SDL_GetWindowSurface(gWindow);
+            //Iniciar PNG Loading
+            int imgFlags = IMG_INIT_PNG;
+            if(!( IMG_Init(imgFlags) & imgFlags)){
+                cout << "SDL_image no se pudo iniciar " << SDL_GetError() << endl;
+                success = false;
+            }else{
+                //Obtener la superficie de la ventana
+                gScreenSurface = SDL_GetWindowSurface(gWindow);
+            }
+
         }
     }
 
@@ -85,7 +90,7 @@ bool loadMedia(){
         success = false;
     }
     //Cargar imagen up
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_UP] = loadSurface("images/up-arrow.bmp");
+    gKeyPressSurfaces[KEY_PRESS_SURFACE_UP] = loadSurface("images/up-arrow.png");
     if( gKeyPressSurfaces[KEY_PRESS_SURFACE_UP] == NULL)
     {
         cout << "Se ha fallado en cargar la imagen up" << endl;
@@ -138,7 +143,7 @@ SDL_Surface* loadSurface(std::string path){
     SDL_Surface* optimizedSurface = NULL;
 
     // Cargar imagen en la superficie desde un path especifica
-    SDL_Surface* loadSurface = SDL_LoadBMP(path.c_str());
+    SDL_Surface* loadSurface = IMG_Load(path.c_str());
     if(loadSurface == NULL){
         cout << "Error al cargar la imagen en la ruta: " << path.c_str() << endl;
     }else{
@@ -213,4 +218,6 @@ void gameRun(){
     close();
 }
 
-#endif // TUTORIAL_4_H_INCLUDED
+
+
+#endif // TUTORIAL_5_H_INCLUDED
