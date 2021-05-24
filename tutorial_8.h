@@ -1,12 +1,13 @@
-#ifndef TUTORIAL_7_H_INCLUDED
-#define TUTORIAL_7_H_INCLUDED
+#ifndef TUTORIAL_8_H_INCLUDED
+#define TUTORIAL_8_H_INCLUDED
+
 
 
 #include<iostream>
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
 /*
-    Tutorial 7: Renderizando Geometrias
+    Tutorial 8: Renderizando partes de la screen (ViewPort)
 */
 
 using namespace std;
@@ -60,7 +61,7 @@ bool init(){
         success = false;
     }else{
         //Crear la ventana
-        gWindow = SDL_CreateWindow("Tutorial 7", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+        gWindow = SDL_CreateWindow("Tutorial 8", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
         if( gWindow == NULL){
            cout << "La ventana no pudo ser creada: " << SDL_GetError() << endl;
            success = false;
@@ -95,6 +96,14 @@ bool init(){
 bool loadMedia(){
     //Bandera de inicialización
     bool success = true;
+        //Cargar PNG texture
+    gTexture = loadTexture("images/up-arrow.png");
+    if(gTexture == NULL){
+        cout << "Error al cargar la imagen texture: " << SDL_GetError() << endl;
+        success = false;
+    }else{
+
+    }
     return success;
 }
 
@@ -153,30 +162,30 @@ void gameRun(){
                     }
                 }
 
-                //Clear screen
-                SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-                SDL_RenderClear(gRenderer);
 
-                //Render red filled quad
-                SDL_Rect fillRect = { SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-                SDL_RenderFillRect(gRenderer, &fillRect);
+				//Clear screen
+				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+				SDL_RenderClear( gRenderer );
 
-                //Render green filled quad
-                SDL_Rect outlineRect = { SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6, SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3};
-                SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0x00, 0xFF);
-                SDL_RenderDrawRect(gRenderer, &outlineRect);
-
-                //Draw blue horizontal line
-                SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-                SDL_RenderDrawLine(gRenderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
+                //
+                SDL_Rect topLeftViewport;
+                topLeftViewport.x = 0;
+                topLeftViewport.y = 0;
+                topLeftViewport.w = SCREEN_WIDTH / 2;
+                topLeftViewport.h = SCREEN_HEIGHT / 2;
+                SDL_RenderSetViewport(gRenderer, &topLeftViewport);
+                //
                 SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
 
-                //Draw vertical line con puntos amarillos
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0xFF);
-                for(int i = 0; i < SCREEN_HEIGHT; i+=4){
-                    SDL_RenderDrawPoint(gRenderer, SCREEN_WIDTH / 2, i);
-                }
+                SDL_Rect bottomRightViewport;
+                bottomRightViewport.x = SCREEN_WIDTH / 2;
+                bottomRightViewport.y = SCREEN_HEIGHT / 2;
+                bottomRightViewport.w = SCREEN_WIDTH / 2;
+                bottomRightViewport.h = SCREEN_HEIGHT / 2;
+                SDL_RenderSetViewport(gRenderer, &bottomRightViewport);
+
+                //
+                SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
 
                 //Update
                 SDL_RenderPresent(gRenderer);
@@ -190,4 +199,4 @@ void gameRun(){
 }
 
 
-#endif // TUTORIAL_7_H_INCLUDED
+#endif // TUTORIAL_8_H_INCLUDED

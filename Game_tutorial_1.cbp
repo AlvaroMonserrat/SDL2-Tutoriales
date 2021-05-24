@@ -43,6 +43,7 @@
 		<Unit filename="tutorial_5.h" />
 		<Unit filename="tutorial_6.h" />
 		<Unit filename="tutorial_7.h" />
+		<Unit filename="tutorial_8.h" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
