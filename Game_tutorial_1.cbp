@@ -33,11 +33,17 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Linker>
-			<Add option="-lSDL2 -lSDL2_image" />
+			<Add option="-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer" />
 		</Linker>
 		<Unit filename="main.cpp" />
 		<Unit filename="tutorial_1.h" />
 		<Unit filename="tutorial_10.h" />
+		<Unit filename="tutorial_11.h" />
+		<Unit filename="tutorial_12.h" />
+		<Unit filename="tutorial_13.h" />
+		<Unit filename="tutorial_14.h" />
+		<Unit filename="tutorial_15.h" />
+		<Unit filename="tutorial_16.h" />
 		<Unit filename="tutorial_2.h" />
 		<Unit filename="tutorial_3.h" />
 		<Unit filename="tutorial_4.h" />
