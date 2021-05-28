@@ -1,6 +1,6 @@
 # depslib dependency file v1.0
-1622121071 source:/home/alvaro/Documents/C++/Game_tutorial_1/main.cpp
-	"tutorial_17.h"
+1622239123 source:/home/alvaro/Documents/C++/Game_tutorial_1/main.cpp
+	"tutorial_19.h"
 
 1620741829 /home/alvaro/Documents/C++/Game_tutorial_1/tutorial_1.h
 
@@ -76,5 +76,18 @@
 	<iostream>
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
+	<cmath>
+
+1622237574 /home/alvaro/Documents/C++/Game_tutorial_1/tutorial_18.h
+	<iostream>
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<cmath>
+
+1622240111 /home/alvaro/Documents/C++/Game_tutorial_1/tutorial_19.h
+	<iostream>
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_mixer.h>
 	<cmath>
 
