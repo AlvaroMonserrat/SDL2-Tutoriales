@@ -48,6 +48,9 @@
 		<Unit filename="tutorial_18.h" />
 		<Unit filename="tutorial_19.h" />
 		<Unit filename="tutorial_2.h" />
+		<Unit filename="tutorial_20.h" />
+		<Unit filename="tutorial_21.h" />
+		<Unit filename="tutorial_22.h" />
 		<Unit filename="tutorial_3.h" />
 		<Unit filename="tutorial_4.h" />
 		<Unit filename="tutorial_5.h" />
