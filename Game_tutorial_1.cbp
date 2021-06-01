@@ -51,6 +51,8 @@
 		<Unit filename="tutorial_20.h" />
 		<Unit filename="tutorial_21.h" />
 		<Unit filename="tutorial_22.h" />
+		<Unit filename="tutorial_23.h" />
+		<Unit filename="tutorial_24.h" />
 		<Unit filename="tutorial_3.h" />
 		<Unit filename="tutorial_4.h" />
 		<Unit filename="tutorial_5.h" />
