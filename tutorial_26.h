@@ -1,19 +1,15 @@
-#ifndef TUTORIAL_24_H_INCLUDED
-#define TUTORIAL_24_H_INCLUDED
-
+#ifndef TUTORIAL_26_H_INCLUDED
+#define TUTORIAL_26_H_INCLUDED
 
 #include<iostream>
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
-#include<SDL2/SDL_ttf.h>
-#include<cmath>
 #include <sstream>
+#include <vector>
 
 /*
-    Tutorial 24: Movimiento
+    Tutorial 26: Colisiones por-pixeles
 */
-
-using namespace std;
 
 //Clase timer
 class LTimer
@@ -151,23 +147,22 @@ public:
     static const int DOT_HEIGHT = 20;
 
     //Maximum axis velocity
-    static const int DOT_VEL = 5;
+    static const int DOT_VEL = 1;
 
     //Inicializar
-    Dot();
+    Dot(int x, int y);
 
     //Capturar key evento
     void handleEvent(SDL_Event& e);
 
     //Mover el punto
-    void move2();
+    void move2(std::vector<SDL_Rect>& otherColliders);
 
     //Mostrar el punto en la pantalla
     void render();
 
-    void getPosXY();
-    void getVelXY();
-
+    //Gets the collision boxes
+    std::vector<SDL_Rect>& getColliders();
 
 private:
     // x e y offsets
@@ -176,6 +171,11 @@ private:
     //velocidad
     int mVelX, mVelY;
 
+    //Dot's collision boxex
+    std::vector<SDL_Rect> mColliders;
+
+    //Moves the collision boxes relative to the dot's offset
+    void shiftColliders();
 };
 
 //Clase
@@ -188,11 +188,12 @@ public:
     ~LTexture();
 
     //Cargar imagen desde una ruta especifica
-    bool loadFromFile(string path);
+    bool loadFromFile(std::string path);
 
+    #if defined(SDL_TTF_MAJOR_VERSION)
     //Crear imagen desde un font string
-    bool loadFromRenderedText(string textureText, SDL_Color textColor);
-
+    bool loadFromRenderedText(std::string textureText, SDL_Color textColor);
+    #endif
     //Desasignar textura en memoria
     void free();
 
@@ -224,8 +225,6 @@ private:
 /*Constantes*/
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
-const int SCREEN_FPS = 60;
-const int SCREEN_TICK_PER_FRAME = 1000 / SCREEN_FPS;
 
 
 /*Variables Globales*/
@@ -234,10 +233,7 @@ SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer =NULL;
 
 //Cargar una imagen individual como textura
-SDL_Texture* loadTexture(string path);
-
-//Globally used font
-TTF_Font *gFont = NULL;
+SDL_Texture* loadTexture(std::string path);
 
 //Scene texture
 LTexture gDotTexture;
@@ -257,6 +253,9 @@ bool loadMedia();
 //Frees media and shuts down SDL
 void close();
 
+//Box collision detector
+bool checkCollision(std::vector<SDL_Rect>& a, std::vector<SDL_Rect>& b);
+
 //Cargan Imagen Individual
 SDL_Surface* loadSurface(std::string path);
 
@@ -273,7 +272,7 @@ LTexture::~LTexture(){
     free();
 }
 
-bool LTexture::loadFromFile(string path){
+bool LTexture::loadFromFile(std::string path){
     //liberar texturas preexistente
     free();
 
@@ -282,14 +281,14 @@ bool LTexture::loadFromFile(string path){
     //Cargar la imagen desde una ruta especifica
     SDL_Surface* loadedSurface = IMG_Load(path.c_str());
     if(loadedSurface == NULL){
-        cout << "Error al cargar la imagen en la ruta: " << path.c_str() << endl;
+        std::cout << "Error al cargar la imagen en la ruta: " << path.c_str() << std::endl;
     }else{
         //Color key image
         SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
 
         newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
         if(newTexture == NULL){
-            cout << "No se pudo crear la texture error: " << SDL_GetError();
+            std::cout << "No se pudo crear la texture error: " << SDL_GetError();
         }else{
             //Obtener dimensiones de la imagen
             mWidth = loadedSurface->w;
@@ -303,7 +302,8 @@ bool LTexture::loadFromFile(string path){
     return mTexture != NULL;
 }
 
-bool LTexture::loadFromRenderedText(string textureText, SDL_Color textColor){
+#if defined(SDL_TTF_MAJOR_VERSION)
+bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor){
 
     //Liberar textura preexistente
     free();
@@ -329,6 +329,7 @@ bool LTexture::loadFromRenderedText(string textureText, SDL_Color textColor){
     return mTexture != NULL;
 
 }
+#endif
 
 void LTexture::free(){
     //Liberar textura si existe
@@ -378,15 +379,56 @@ int LTexture::getHeight(){
 
 
 
-Dot::Dot()
+Dot::Dot(int x, int y)
 {
     //Iniciar posición
-    mPosX = 0;
-    mPosY = 0;
+    mPosX = x;
+    mPosY = y;
 
     //Iniciar velocidad
     mVelX = 0;
     mVelY = 0;
+
+    //Crear Rect necesarios
+    mColliders.resize(11);
+
+    //Set collision box dimension
+    mColliders[0].w = 6;
+    mColliders[0].h = 1;
+
+    mColliders[ 1 ].w = 10;
+    mColliders[ 1 ].h = 1;
+
+    mColliders[ 2 ].w = 14;
+    mColliders[ 2 ].h = 1;
+
+    mColliders[ 3 ].w = 16;
+    mColliders[ 3 ].h = 2;
+
+    mColliders[ 4 ].w = 18;
+    mColliders[ 4 ].h = 2;
+
+    mColliders[ 5 ].w = 20;
+    mColliders[ 5 ].h = 6;
+
+    mColliders[ 6 ].w = 18;
+    mColliders[ 6 ].h = 2;
+
+    mColliders[ 7 ].w = 16;
+    mColliders[ 7 ].h = 2;
+
+    mColliders[ 8 ].w = 14;
+    mColliders[ 8 ].h = 1;
+
+    mColliders[ 9 ].w = 10;
+    mColliders[ 9 ].h = 1;
+
+    mColliders[ 10 ].w = 6;
+    mColliders[ 10 ].h = 1;
+
+    //Iniciar colliders relative to position
+    shiftColliders();
+
 }
 
 void Dot::handleEvent(SDL_Event &e)
@@ -415,27 +457,33 @@ void Dot::handleEvent(SDL_Event &e)
 
 }
 
-void Dot::move2()
+void Dot::move2(std::vector<SDL_Rect> &otherColliders)
 {
     //Move the dot left or right
     mPosX += mVelX;
+    shiftColliders();
 
-    cout << mPosX << endl;
+    std::cout << mPosX << std::endl;
 
-    if(mPosX < 0 || (mPosX + DOT_WIDTH > SCREEN_WIDTH))
+    if( (mPosX < 0) || (mPosX + DOT_WIDTH > SCREEN_WIDTH) || checkCollision(mColliders, otherColliders))
     {
         //move back
         mPosX -= mVelX;
+        shiftColliders();
     }
 
     //Move the dot up or down
     mPosY += mVelY;
-    if((mPosY < 0) || (mPosY + DOT_HEIGHT > SCREEN_HEIGHT))
+    shiftColliders();
+
+    if((mPosY < 0) || (mPosY + DOT_HEIGHT > SCREEN_HEIGHT) || checkCollision(mColliders, otherColliders))
     {
         //move back
         mPosY -= mVelY;
+        shiftColliders();
     }
 }
+
 
 void Dot::render()
 {
@@ -443,16 +491,28 @@ void Dot::render()
     gDotTexture.render(mPosX, mPosY);
 }
 
-void Dot::getVelXY()
+std::vector<SDL_Rect>& Dot::getColliders()
 {
-    cout << "Velocidad es x: " << mVelX << endl;
-    cout << "Velocidad es y: " << mVelY << endl;
+	return mColliders;
 }
 
-void Dot::getPosXY()
+
+void Dot::shiftColliders()
 {
-    cout << "Pos x: " << mPosX << endl;
-    cout << "Pos y: " << mPosY << endl;
+    int row = 0;
+
+    //
+    for(int i = 0; i < mColliders.size(); ++i)
+    {
+        //Center the collision box
+        mColliders[i].x = mPosX + (DOT_WIDTH - mColliders[i].w) / 2;
+
+        //Set the collision box at its row offset
+        mColliders[i].y = mPosY + row;
+
+        //Move the row offset down the height of the collision box
+        row += mColliders[i].h;
+    }
 }
 
 bool init(){
@@ -460,20 +520,20 @@ bool init(){
     bool success = true;
 
     if( SDL_Init(SDL_INIT_VIDEO) < 0){
-        cout << "Error al iniciar SDL library: " << SDL_GetError() << endl;
+        std::cout << "Error al iniciar SDL library: " << SDL_GetError() << std::endl;
         success = false;
     }else{
         //Crear la ventana
-        gWindow = SDL_CreateWindow("Tutorial 24", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+        gWindow = SDL_CreateWindow("Tutorial 26", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
         if( gWindow == NULL){
-           cout << "La ventana no pudo ser creada: " << SDL_GetError() << endl;
+           std::cout << "La ventana no pudo ser creada: " << SDL_GetError() << std::endl;
            success = false;
         }else{
 
             //Crear un render para la ventana
             gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
             if(gRenderer == NULL){
-                cout << "Renderer no pudo ser creado: " << SDL_GetError() << endl;
+                std::cout << "Renderer no pudo ser creado: " << SDL_GetError() << std::endl;
                 success = false;
             }else{
 
@@ -483,7 +543,7 @@ bool init(){
                 //Iniciar PNG Loading
                 int imgFlags = IMG_INIT_PNG;
                 if(!( IMG_Init(imgFlags) & imgFlags)){
-                    cout << "SDL_image no se pudo iniciar " << SDL_GetError() << endl;
+                    std::cout << "SDL_image no se pudo iniciar " << SDL_GetError() << std::endl;
                     success = false;
                 }
 
@@ -504,7 +564,7 @@ bool loadMedia(){
     //Open the font
     if(!gDotTexture.loadFromFile("images/dot.bmp"))
     {
-        cout << "Error al cargar la imagen dot" << endl;
+        std::cout << "Error al cargar la imagen dot" << std::endl;
         success = false;
     }
 
@@ -526,14 +586,57 @@ void close(){
     SDL_Quit();
 }
 
+bool checkCollision(std::vector<SDL_Rect> &a, std::vector<SDL_Rect> &b)
+{
+    //The sides of the rectangles
+    int leftA, leftB;
+    int rightA, rightB;
+    int topA, topB;
+    int bottomA, bottomB;
+
+    //Go through the A boxes
+    for(int Abox = 0; Abox < a.size(); Abox++)
+    {
+        //  Calculate the sides of rect A
+        leftA = a[Abox].x;
+        rightA = a[Abox].x + a[Abox].w;
+
+        topA = a[Abox].y;
+        bottomA = a[Abox].y + a[Abox].h;
+
+
+        //Go through the B boxes
+        for(int Bbox = 0; Bbox < b.size(); Bbox++)
+        {
+            // Caculate the sides of rect B
+            leftB = b[Bbox].x;
+            rightB = b[Bbox].x + b[Bbox].w;
+
+            topB = b[Bbox].y;
+            bottomB = b[Bbox].y + b[Bbox].h;
+
+            if( ((bottomA <= topB) || (topA >= bottomB) || (rightA <= leftB) || (leftA >= rightB)) == false)
+            {
+                //A collision is detected
+                return true;
+            }
+        }
+    }
+
+    return false;
+
+}
+
 void gameRun(){
     if(!init()){
-        cout << "Ha fallado la inicialización" << endl;
+        std::cout << "Ha fallado la inicialización" << std::endl;
     }else{
         if(!loadMedia()){
-            cout << "Ha fallado cargar la imagen" << endl;
-        }else{
-            Dot dot;
+         }else{
+
+            Dot dot(0, 0);
+
+            Dot otherDot(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4);
 
             while(!quit)
             {
@@ -545,24 +648,17 @@ void gameRun(){
                     {
                         quit = true;
                     }
-                    if(eventHandler.type == SDL_KEYDOWN)
-                    {
-                        if(eventHandler.key.keysym.sym == SDLK_w)
-                        {
-                            dot.getVelXY();
-                        }else if(eventHandler.key.keysym.sym == SDLK_s)
-                        {
-                            dot.getPosXY();
-                        }
-                    }
                     dot.handleEvent(eventHandler);
                 }
 
 				//Clear screen
-				dot.move2();
+				dot.move2(otherDot.getColliders());
 
+                //Clear screen
 				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( gRenderer );
+
+				otherDot.render();
 
 				dot.render();
                 //Update
@@ -577,4 +673,4 @@ void gameRun(){
     close();
 }
 
-#endif // TUTORIAL_24_H_INCLUDED
+#endif // TUTORIAL_26_H_INCLUDED

@@ -1,6 +1,5 @@
-#ifndef TUTORIAL_24_H_INCLUDED
-#define TUTORIAL_24_H_INCLUDED
-
+#ifndef TUTORIAL_25_H_INCLUDED
+#define TUTORIAL_25_H_INCLUDED
 
 #include<iostream>
 #include<SDL2/SDL.h>
@@ -10,7 +9,7 @@
 #include <sstream>
 
 /*
-    Tutorial 24: Movimiento
+    Tutorial 25: Colisiones
 */
 
 using namespace std;
@@ -160,7 +159,7 @@ public:
     void handleEvent(SDL_Event& e);
 
     //Mover el punto
-    void move2();
+    void move2(SDL_Rect& wall);
 
     //Mostrar el punto en la pantalla
     void render();
@@ -175,6 +174,9 @@ private:
 
     //velocidad
     int mVelX, mVelY;
+
+    //Dot's collision box
+    SDL_Rect mCollider;
 
 };
 
@@ -256,6 +258,9 @@ bool init();
 bool loadMedia();
 //Frees media and shuts down SDL
 void close();
+
+//Box collision detector
+bool checkCollision(SDL_Rect a, SDL_Rect b);
 
 //Cargan Imagen Individual
 SDL_Surface* loadSurface(std::string path);
@@ -384,6 +389,10 @@ Dot::Dot()
     mPosX = 0;
     mPosY = 0;
 
+    //Set collision box dimension
+    mCollider.w = DOT_WIDTH;
+    mCollider.h = DOT_HEIGHT;
+
     //Iniciar velocidad
     mVelX = 0;
     mVelY = 0;
@@ -415,27 +424,33 @@ void Dot::handleEvent(SDL_Event &e)
 
 }
 
-void Dot::move2()
+void Dot::move2(SDL_Rect &wall)
 {
     //Move the dot left or right
     mPosX += mVelX;
+    mCollider.x = mPosX;
 
     cout << mPosX << endl;
 
-    if(mPosX < 0 || (mPosX + DOT_WIDTH > SCREEN_WIDTH))
+    if(mPosX < 0 || (mPosX + DOT_WIDTH > SCREEN_WIDTH) || checkCollision(mCollider, wall))
     {
         //move back
         mPosX -= mVelX;
+        mCollider.x = mPosX;
     }
 
     //Move the dot up or down
     mPosY += mVelY;
-    if((mPosY < 0) || (mPosY + DOT_HEIGHT > SCREEN_HEIGHT))
+    mCollider.y = mPosY;
+
+    if((mPosY < 0) || (mPosY + DOT_HEIGHT > SCREEN_HEIGHT) || checkCollision(mCollider, wall))
     {
         //move back
         mPosY -= mVelY;
+        mCollider.y = mPosY;
     }
 }
+
 
 void Dot::render()
 {
@@ -464,7 +479,7 @@ bool init(){
         success = false;
     }else{
         //Crear la ventana
-        gWindow = SDL_CreateWindow("Tutorial 24", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+        gWindow = SDL_CreateWindow("Tutorial 25", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
         if( gWindow == NULL){
            cout << "La ventana no pudo ser creada: " << SDL_GetError() << endl;
            success = false;
@@ -526,6 +541,51 @@ void close(){
     SDL_Quit();
 }
 
+bool checkCollision(SDL_Rect a, SDL_Rect b)
+{
+    //The sides of the rectangles
+    int leftA, leftB;
+    int rightA, rightB;
+    int topA, topB;
+    int bottomA, bottomB;
+
+    //Calculate the sides of rect A
+    leftA = a.x;
+    rightA = a.x + a.w;
+    topA = a.y;
+    bottomA = a.y + a.h;
+
+    //Calculate the side of rect B
+    leftB = b.x;
+    rightB = b.x + b.w;
+    topB = b.y;
+    bottomB = b.y + b.h;
+
+    //If any of the sides from A are outsides of B
+    if( bottomA <= topB)
+    {
+        return false;
+    }
+
+    if( topA >= bottomB)
+    {
+        return false;
+    }
+
+    if( rightA <= leftB)
+    {
+        return false;
+    }
+
+    if( leftA >= rightB)
+    {
+        return false;
+    }
+
+    return true;
+
+}
+
 void gameRun(){
     if(!init()){
         cout << "Ha fallado la inicialización" << endl;
@@ -534,6 +594,13 @@ void gameRun(){
             cout << "Ha fallado cargar la imagen" << endl;
         }else{
             Dot dot;
+
+            //Set the wall
+            SDL_Rect wall;
+            wall.x = 300;
+            wall.y = 200;
+            wall.w = 100;
+            wall.h = 200;
 
             while(!quit)
             {
@@ -559,10 +626,15 @@ void gameRun(){
                 }
 
 				//Clear screen
-				dot.move2();
+				dot.move2(wall);
 
+                //Clear screen
 				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( gRenderer );
+
+				//Render wall
+				SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF);
+                SDL_RenderDrawRect(gRenderer, &wall);
 
 				dot.render();
                 //Update
@@ -577,4 +649,4 @@ void gameRun(){
     close();
 }
 
-#endif // TUTORIAL_24_H_INCLUDED
+#endif // TUTORIAL_25_H_INCLUDED

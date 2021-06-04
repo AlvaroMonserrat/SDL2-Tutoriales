@@ -1,9 +1,9 @@
-#include "tutorial_24.h"
+#include "tutorial_26.h"
 
-int main(){
+
+
+int main(int argc, char* args[] ){
     gameRun();
     return 0;
 }
-
-
 

@@ -36,6 +36,7 @@
 			<Add option="-lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer" />
 		</Linker>
 		<Unit filename="main.cpp" />
+		<Unit filename="test1.h" />
 		<Unit filename="tutorial_1.h" />
 		<Unit filename="tutorial_10.h" />
 		<Unit filename="tutorial_11.h" />
@@ -54,6 +55,7 @@
 		<Unit filename="tutorial_23.h" />
 		<Unit filename="tutorial_24.h" />
 		<Unit filename="tutorial_25.h" />
+		<Unit filename="tutorial_26.h" />
 		<Unit filename="tutorial_3.h" />
 		<Unit filename="tutorial_4.h" />
 		<Unit filename="tutorial_5.h" />
