@@ -11,7 +11,7 @@
 #include <SDL2/SDL_ttf.h>
 
 /*
-    Tutorial 31: Leer y escribir archivos
+    Tutorial 32: Grabar audio y reproducir
 */
 
 
