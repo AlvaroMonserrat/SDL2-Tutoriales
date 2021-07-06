@@ -159,8 +159,8 @@
 	<sstream>
 	<vector>
 
-1624933199 source:/home/amonserrat/Documents/SDL2_Tutorial/SDL2-Tutoriales/main.cpp
-	"tutorial_40.h"
+1625156837 source:/home/amonserrat/Documents/SDL2_Tutorial/SDL2-Tutoriales/main.cpp
+	"tutorial_41.h"
 
 1623374213 /home/amonserrat/Documents/SDL2_Tutorial/SDL2-Tutoriales/tutorial_28.h
 	<iostream>
@@ -252,6 +252,14 @@
 	<fstream>
 
 1624933403 /home/amonserrat/Documents/SDL2_Tutorial/SDL2-Tutoriales/tutorial_40.h
+	<iostream>
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<sstream>
+	<vector>
+	<fstream>
+
+1625167302 /home/amonserrat/Documents/SDL2_Tutorial/SDL2-Tutoriales/tutorial_41.h
 	<iostream>
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>

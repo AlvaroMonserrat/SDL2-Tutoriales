@@ -1,5 +1,5 @@
-#ifndef TUTORIAL_40_H_INCLUDED
-#define TUTORIAL_40_H_INCLUDED
+#ifndef TUTORIAL_41_H_INCLUDED
+#define TUTORIAL_41_H_INCLUDED
 
 #include<iostream>
 #include<SDL2/SDL.h>
@@ -9,7 +9,7 @@
 #include <fstream>
 
 /*
-    Tutorial 40: Texture Streaming
+    Tutorial 41: Render to Texture
 */
 
 /*Constantes*/
@@ -34,7 +34,7 @@ public:
     #endif
 
     //Creates blank texture
-    bool createBlank(int width, int height);
+    bool createBlank(int width, int height, SDL_TextureAccess = SDL_TEXTUREACCESS_STREAMING);
 
     //Desasignar textura en memoria
     void free();
@@ -50,6 +50,10 @@ public:
 
     //Renders textura en un punto dado
     void render(int x, int y, SDL_Rect* clip = NULL,double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+
+    //Set self as render target
+    void setAsRenderTarget();
+
     //Obtener dimensioens de la imagen
     int getWidth();
     int getHeight();
@@ -125,10 +129,7 @@ SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer =NULL;
 
 //Scene textures
-LTexture gStreamingTexture;
-
-//Animation stream
-DataStream gDataStream;
+LTexture gTargetTexture;
 
 //Cargar una imagen individual como textura
 SDL_Texture* loadTexture(std::string path);
@@ -273,10 +274,10 @@ bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor
 }
 #endif
 
-bool LTexture::createBlank(int width, int height)
+bool LTexture::createBlank(int width, int height, SDL_TextureAccess access)
 {
     //Create uninitialized texture
-    mTexture = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, width, height);
+    mTexture = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_RGBA8888, access, width, height);
     if(mTexture == NULL)
     {
         std::cout << "Error al crear la textura blanca" << std::endl;
@@ -288,6 +289,12 @@ bool LTexture::createBlank(int width, int height)
     }
 
     return mTexture != NULL;
+}
+
+void LTexture::setAsRenderTarget()
+{
+    //Make self render target
+    SDL_SetRenderTarget(gRenderer, mTexture);
 }
 
 void LTexture::free(){
@@ -705,7 +712,7 @@ bool init(){
         success = false;
     }else{
         //Crear la ventana
-        gWindow = SDL_CreateWindow("Tutorial 40", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+        gWindow = SDL_CreateWindow("Tutorial 41", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
         if( gWindow == NULL){
            std::cout << "La ventana no pudo ser creada: " << SDL_GetError() << std::endl;
            success = false;
@@ -743,16 +750,9 @@ bool loadMedia(){
     bool success = true;
 
     //Load blank texture
-    if(!gStreamingTexture.createBlank(64, 205))
+    if(!gTargetTexture.createBlank(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_TEXTUREACCESS_TARGET))
     {
-        std::cout << "Error al crear la streaming texture" << std::endl;
-        success = false;
-    }
-
-    //Load data stream
-    if(!gDataStream.loadMedia())
-    {
-        std::cout << "Error al cargar la data stream" << std::endl;
+        std::cout << "Error al crear la target texture" << std::endl;
         success = false;
     }
 
@@ -762,8 +762,8 @@ bool loadMedia(){
 
 void close(){
 
-    gStreamingTexture.free();
-    gDataStream.free();
+    gTargetTexture.free();
+
     // Destruir ventana
     SDL_DestroyRenderer(gRenderer);
     SDL_DestroyWindow(gWindow);
@@ -790,6 +790,12 @@ void gameRun(){
         }
         else
         {
+
+            //Rotation variables
+            double angle = 0;
+            SDL_Point screenCenter = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
+
+
             while(!quit)
             {
                 while(SDL_PollEvent(&eventHandler) != 0)
@@ -800,17 +806,46 @@ void gameRun(){
                     }
                 }
 
+                //rotate
+                angle += 2;
+                if(angle > 360)
+                {
+                    angle -= 360;
+                }
+
+                //Set self as render target
+                gTargetTexture.setAsRenderTarget();
+
                 //Clear screen
 				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( gRenderer );
 
-                //Copy frame from buffer
-                gStreamingTexture.lockTexture();
-                gStreamingTexture.copyPixels(gDataStream.getBuffer());
-                gStreamingTexture.unlockTexture();
+				//Render red filled quad
+				SDL_Rect fillRect = {SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
+				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0xFF );
+				SDL_RenderFillRect( gRenderer, &fillRect );
 
-                //Render frame
-                gStreamingTexture.render(( SCREEN_WIDTH - gStreamingTexture.getWidth() ) / 2, ( SCREEN_HEIGHT - gStreamingTexture.getHeight() ) / 2);
+				//Render green outlined quad
+				SDL_Rect outlineRect = { SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6, SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3 };
+				SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0x00, 0xFF );
+				SDL_RenderDrawRect( gRenderer, &outlineRect );
+
+				//Draw blue horizontal line
+				SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0xFF, 0xFF );
+				SDL_RenderDrawLine( gRenderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2 );
+
+                //Draw vertical line of yellow dots
+                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0xFF);
+                for( int i = 0; i < SCREEN_HEIGHT; i += 4 )
+				{
+					SDL_RenderDrawPoint( gRenderer, SCREEN_WIDTH / 2, i );
+				}
+
+				//Reset render target
+				SDL_SetRenderTarget(gRenderer, NULL);
+
+				//Show rendered to texture (Post rendering)
+				gTargetTexture.render(0, 0, NULL, angle, &screenCenter);
 
                 //Update
                 SDL_RenderPresent(gRenderer);
@@ -825,4 +860,4 @@ void gameRun(){
 
 }
 
-#endif // TUTORIAL_40_H_INCLUDED
+#endif // TUTORIAL_41_H_INCLUDED
